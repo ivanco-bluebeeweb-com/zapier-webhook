@@ -1,0 +1,380 @@
+{
+  "manifest_schema_version": 3,
+  "sdk_version": "5.9.12",
+  "app_id": "zapier-webhook",
+  "version": "0.1.0",
+  "name": "Zapier Webhook",
+  "description": "Two-way webhook bridge between Imperal and Zapier, built on Webhooks by Zapier (no Zap listing or management -- Zapier's public API for that requires a separate, later app-review process; see this app's own description for why). Send events from Imperal to trigger a Zap, and receive events a Zap sends back into Imperal.",
+  "icon": "icon.svg",
+  "actions_explicit": true,
+  "system": false,
+  "capabilities": [
+    "zapier:read",
+    "zapier:write"
+  ],
+  "tools": [
+    {
+      "name": "set_outgoing_webhook",
+      "description": "Save (or clear, with an empty webhook_url) the Zapier 'Catch Hook' trigger URL that send_webhook_event will POST to. Get this URL by adding a 'Webhooks by Zapier' trigger step ('Catch Hook') as the first step of a Zap and copying its URL.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "zapier.outgoing_webhook.configured"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "webhook_url": {
+            "default": "",
+            "description": "Zapier 'Catch Hook' trigger URL to POST events to. Empty clears it.",
+            "title": "Webhook Url",
+            "type": "string"
+          }
+        },
+        "title": "SetOutgoingWebhookParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "configured": {
+            "title": "Configured",
+            "type": "boolean"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "configured"
+        ],
+        "title": "OutgoingWebhookStatus",
+        "type": "object"
+      },
+      "event": "zapier-webhook.set_outgoing_webhook",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "zapier-webhook"
+    },
+    {
+      "name": "get_outgoing_webhook_status",
+      "description": "Check whether an outgoing Zapier webhook URL is configured (does not reveal the URL).",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "Empty params for read-only calls that take no arguments.",
+        "properties": {},
+        "title": "NoParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "configured": {
+            "title": "Configured",
+            "type": "boolean"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "configured"
+        ],
+        "title": "OutgoingWebhookStatus",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "zapier-webhook"
+    },
+    {
+      "name": "send_webhook_event",
+      "description": "Send an event payload to the configured Zapier Catch Hook webhook right now -- for other Imperal apps/automations to trigger a Zap. Run set_outgoing_webhook first if you haven't configured one yet.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "zapier.webhook.sent"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "payload": {
+            "additionalProperties": true,
+            "description": "Arbitrary JSON payload to POST to the configured Zapier Catch Hook URL.",
+            "title": "Payload",
+            "type": "object"
+          }
+        },
+        "title": "SendWebhookEventParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "delivered": {
+            "title": "Delivered",
+            "type": "boolean"
+          },
+          "status_code": {
+            "default": 0,
+            "title": "Status Code",
+            "type": "integer"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "delivered"
+        ],
+        "title": "WebhookDeliveryResult",
+        "type": "object"
+      },
+      "event": "zapier-webhook.send_webhook_event",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "zapier-webhook"
+    },
+    {
+      "name": "get_inbound_webhook_config",
+      "description": "Read the inbound webhook URL and whether a shared secret is set up for receiving events FROM a Zap (via a 'Webhooks by Zapier' POST action step). Never reveals the secret itself.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "Empty params for read-only calls that take no arguments.",
+        "properties": {},
+        "title": "NoParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "configured": {
+            "title": "Configured",
+            "type": "boolean"
+          },
+          "webhook_url": {
+            "default": "",
+            "title": "Webhook Url",
+            "type": "string"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "configured"
+        ],
+        "title": "InboundWebhookConfig",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "zapier-webhook"
+    },
+    {
+      "name": "regenerate_inbound_secret",
+      "description": "Generate a fresh shared secret for the inbound direction (Zapier -> Imperal), discarding any previous one. Paste the new value into a custom header named X-Zapier-Webhook-Secret on a 'Webhooks by Zapier' POST action step in your Zap.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "zapier.inbound_secret.rotated"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {},
+        "title": "RegenerateInboundSecretParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "configured": {
+            "title": "Configured",
+            "type": "boolean"
+          },
+          "webhook_url": {
+            "default": "",
+            "title": "Webhook Url",
+            "type": "string"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "configured"
+        ],
+        "title": "InboundWebhookConfig",
+        "type": "object"
+      },
+      "event": "zapier-webhook.regenerate_inbound_secret",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "zapier-webhook"
+    },
+    {
+      "name": "list_inbound_events",
+      "description": "List the most recent events a Zap has POSTed into this app via the inbound webhook, newest first.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "Empty params for read-only calls that take no arguments.",
+        "properties": {},
+        "title": "NoParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "InboundEventSummary": {
+            "properties": {
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "received_at": {
+                "title": "Received At",
+                "type": "string"
+              },
+              "payload_preview": {
+                "default": "",
+                "title": "Payload Preview",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "received_at"
+            ],
+            "title": "InboundEventSummary",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/$defs/InboundEventSummary"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "title": "InboundEventList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "zapier-webhook"
+    }
+  ],
+  "signals": [],
+  "schedules": [],
+  "required_scopes": [],
+  "icon_size_bytes": 771,
+  "webhooks": [
+    {
+      "path": "/inbound",
+      "method": "POST",
+      "secret_header": ""
+    }
+  ],
+  "lifecycle": {
+    "health_check": {
+      "interval_sec": 60
+    }
+  },
+  "secrets": [
+    {
+      "name": "zapier_outgoing_webhook_url",
+      "description": "Outgoing Zapier 'Catch Hook' trigger URL -- add a 'Webhooks by Zapier' trigger step to a Zap, copy the URL it gives you, and paste it here. send_webhook_event POSTs to this URL.",
+      "required": false,
+      "write_mode": "both",
+      "max_bytes": 4096,
+      "scope": "user"
+    },
+    {
+      "name": "zapier_inbound_shared_secret",
+      "description": "Shared secret this app generates for you -- paste it into a custom header (X-Zapier-Webhook-Secret) on a 'Webhooks by Zapier' POST action step, so this app can verify events really came from your Zap.",
+      "required": false,
+      "write_mode": "both",
+      "max_bytes": 4096,
+      "scope": "user"
+    }
+  ],
+  "panels": [
+    {
+      "panel_id": "secrets",
+      "slot": "right",
+      "title": "Secrets",
+      "tree": {},
+      "icon": "KeyRound",
+      "refresh": "manual",
+      "center_overlay": false
+    },
+    {
+      "panel_id": "zapier_connect",
+      "slot": "left",
+      "title": "Zapier Webhook",
+      "tree": {},
+      "icon": "⚡",
+      "refresh": "manual",
+      "center_overlay": false,
+      "default_width": 320,
+      "min_width": 260,
+      "max_width": 420
+    },
+    {
+      "panel_id": "zapier_connect_help",
+      "slot": "center",
+      "title": "How Zapier Webhook works",
+      "tree": {},
+      "icon": "",
+      "refresh": "manual",
+      "center_overlay": true
+    },
+    {
+      "panel_id": "zapier_center",
+      "slot": "center",
+      "title": "Zapier Webhook",
+      "tree": {},
+      "icon": "⚡",
+      "refresh": "manual",
+      "center_overlay": true
+    },
+    {
+      "panel_id": "zapier_settings",
+      "slot": "center",
+      "title": "App settings",
+      "tree": {},
+      "icon": "⚙️",
+      "refresh": "manual",
+      "center_overlay": true
+    }
+  ]
+}
