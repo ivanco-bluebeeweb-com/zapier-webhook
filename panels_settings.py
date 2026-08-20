@@ -37,12 +37,13 @@ def _outgoing_section(configured: bool) -> ui.UINode:
         ui.Text("Send events from Imperal into a Zap.", variant="caption"),
         ui.Form(
             children=[
-                ui.Input(
-                    label="Catch Hook URL",
-                    placeholder="https://hooks.zapier.com/hooks/catch/...",
-                    param_name="webhook_url",
-                    full_width=True,
-                ),
+                ui.Stack(direction="v", gap=1, align="stretch", children=[
+                    ui.Text("Catch Hook URL", variant="caption"),
+                    ui.Input(
+                        placeholder="https://hooks.zapier.com/hooks/catch/...",
+                        param_name="webhook_url",
+                    ),
+                ]),
             ],
             submit_label="Save webhook",
             action="set_outgoing_webhook",
