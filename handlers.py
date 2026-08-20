@@ -134,7 +134,8 @@ async def get_outgoing_webhook_status(ctx, params: NoParams) -> "ActionResult":
         OutgoingWebhookStatus(
             configured=configured,
             detail="Configured" if configured else "Not configured",
-        )
+        ),
+        summary="Outgoing webhook is configured." if configured else "No outgoing webhook configured.",
     )
 
 
@@ -180,15 +181,17 @@ async def send_webhook_event(ctx, params: SendWebhookEventParams) -> "ActionResu
 async def get_inbound_webhook_config(ctx, params: NoParams) -> "ActionResult":
     """Read-only status of the inbound (Zap -> Imperal) webhook setup."""
     secret = await ctx.secrets.get(_INBOUND_SECRET_NAME)
+    configured = bool(secret)
     return ActionResult.success(
         InboundWebhookConfig(
-            configured=bool(secret),
+            configured=configured,
             webhook_url=_build_inbound_url(ctx),
             detail=(
                 "Ready to receive events" if secret
                 else "Generate a shared secret first (regenerate_inbound_secret)"
             ),
-        )
+        ),
+        summary="Inbound webhook is ready to receive events." if configured else "Inbound webhook needs a shared secret first.",
     )
 
 
@@ -232,7 +235,7 @@ async def list_inbound_events(ctx, params: NoParams) -> "ActionResult":
     page = await ctx.store.query(
         _INBOUND_EVENTS_COLLECTION, order_by="-received_at", limit=_INBOUND_EVENTS_MAX,
     )
-    items = getattr(page, "items", None) or []
+    items = getattr(page, "data", None) or []
     events = [
         InboundEventSummary(
             id=str(getattr(doc, "id", getattr(doc, "doc_id", ""))),
@@ -241,7 +244,10 @@ async def list_inbound_events(ctx, params: NoParams) -> "ActionResult":
         )
         for doc in items
     ]
-    return ActionResult.success(InboundEventList(events=events, total=len(events)))
+    return ActionResult.success(
+        InboundEventList(events=events, total=len(events)),
+        summary=f"{len(events)} recent inbound event(s)." if events else "No inbound events yet.",
+    )
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -284,7 +290,7 @@ async def receive_zapier_webhook(ctx, headers: dict, body: str, query_params: di
     page = await ctx.store.query(
         _INBOUND_EVENTS_COLLECTION, order_by="-received_at", limit=1000,
     )
-    items = getattr(page, "items", None) or []
+    items = getattr(page, "data", None) or []
     if len(items) > _INBOUND_EVENTS_MAX:
         for doc in items[_INBOUND_EVENTS_MAX:]:
             doc_id = getattr(doc, "id", None) or getattr(doc, "doc_id", None)
