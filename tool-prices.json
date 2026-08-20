@@ -1,0 +1,8 @@
+{
+  "set_outgoing_webhook": 16,
+  "get_outgoing_webhook_status": 8,
+  "send_webhook_event": 16,
+  "get_inbound_webhook_config": 8,
+  "regenerate_inbound_secret": 16,
+  "list_inbound_events": 8
+}
