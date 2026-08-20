@@ -49,7 +49,7 @@ def _inbound_section(configured: bool, inbound_url: str) -> ui.UINode:
         ])
     return ui.Stack(direction="v", gap=1, align="start", children=[
         ui.Text("Incoming (Zap -> Imperal)", variant="body"),
-        ui.Text(inbound_url, variant="caption", copyable=True),
+        ui.Text(inbound_url, variant="caption"),
     ])
 
 

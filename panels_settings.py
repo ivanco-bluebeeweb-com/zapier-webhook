@@ -36,16 +36,13 @@ def _outgoing_section(configured: bool) -> ui.UINode:
         ui.Text("Outgoing webhook (Imperal -> Zap)", variant="heading"),
         ui.Text("Send events from Imperal into a Zap.", variant="caption"),
         ui.Form(
-            full_width=True,
             children=[
-                ui.Stack(direction="v", gap=1, align="stretch", children=[
-                    ui.Text("Catch Hook URL", variant="caption"),
-                    ui.Input(
-                        placeholder="https://hooks.zapier.com/hooks/catch/...",
-                        param_name="webhook_url",
-                        full_width=True,
-                    ),
-                ]),
+                ui.Input(
+                    label="Catch Hook URL",
+                    placeholder="https://hooks.zapier.com/hooks/catch/...",
+                    param_name="webhook_url",
+                    full_width=True,
+                ),
             ],
             submit_label="Save webhook",
             action="set_outgoing_webhook",
@@ -59,21 +56,21 @@ def _inbound_section(configured: bool, webhook_url: str) -> ui.UINode:
     rows: list[ui.UINode] = [
         ui.Text("Incoming webhook (Zap -> Imperal)", variant="heading"),
         ui.Text("Webhook URL", variant="caption"),
-        ui.Text(webhook_url, variant="body", copyable=True),
+        ui.Text(webhook_url, variant="body"),
         ui.Text("Header name to add in your Zap's POST step", variant="caption"),
-        ui.Text("X-Zapier-Webhook-Secret", variant="body", copyable=True),
+        ui.Text("X-Zapier-Webhook-Secret", variant="body"),
     ]
     if configured:
         rows.append(ui.Badge(label="Ready to receive events", color="green"))
+        rows.append(ui.Text(
+            "Regenerating replaces the secret immediately -- update the "
+            "header value in your Zap's action step right after.",
+            variant="caption",
+        ))
         rows.append(ui.Button(
             "Regenerate secret", variant="secondary", size="sm", full_width=True,
             icon="refresh-cw",
-            on_click=ui.Call("regenerate_inbound_secret", confirm=True),
-            confirm=(
-                "Generate a new shared secret? Any Zap using the current "
-                "one will stop being accepted until you update its header "
-                "value with the new secret."
-            ),
+            on_click=ui.Call("regenerate_inbound_secret"),
         ))
     else:
         rows.append(ui.Text(

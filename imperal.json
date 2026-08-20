@@ -390,6 +390,6 @@
       "send_webhook_event": 16,
       "set_outgoing_webhook": 16
     },
-    "notes": "SYNCHRONISED WITH THE PLATFORM (both save_pricing and update_pricing called; per known platform limitation -- same one documented in Make.com Connector/PRICING_HISTORY.md -- neither call echoes back pricing_config via any read tool; confirmation is only possible via the Dev Portal UI itself). Every function priced on the fixed platform scale {0,8,16,20,40,60}: 8 = simple read (get_*/list_*); 16 = standard single write/mutation. No 0-priced functions here -- unlike OAuth-style BYOK connectors, this app has no separate connect/disconnect credential step; every function does real work against the webhook config or POSTs into the user's own Zap."
+    "notes": "SYNCHRONISED WITH THE PLATFORM (both save_pricing and update_pricing called; per known platform limitation neither call echoes back pricing_config via any read tool -- confirmation only possible via the Dev Portal UI). Fixed platform scale {0,8,16,20,40,60}: 8 = simple read; 16 = standard single write/mutation. No 0-priced functions -- no separate connect/disconnect credential step exists."
   }
 }
