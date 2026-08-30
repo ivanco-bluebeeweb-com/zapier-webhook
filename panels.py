@@ -74,6 +74,10 @@ async def zapier_connect_panel(ctx, **kwargs) -> object:
             "How this works", variant="ghost", size="sm", full_width=True,
             icon="help-circle", on_click=ui.Call("__panel__zapier_connect_help"),
         ),
+        ui.Button(
+            "View webhook activity", variant="primary", size="sm", full_width=True,
+            icon="Activity", on_click=ui.Call("__panel__zapier_center"),
+        ),
         _settings_button(),
     ]
     return ui.Stack(direction="v", gap=4, align="stretch", children=children)
@@ -125,7 +129,32 @@ async def zapier_center_panel(ctx, **kwargs) -> object:
     empty (not a caching issue) until center_overlay=True is set. Text is
     the shared canonical wording -- must stay identical across every app
     in this situation, not app-specific."""
-    return ui.Empty(
-        message="Nothing to show here -- this app is managed entirely from the sidebar.",
-        icon="👈",
-    )
+    from schemas import NoParams
+    outgoing = await h.get_outgoing_webhook_status(ctx, NoParams())
+    inbound = await h.get_inbound_webhook_config(ctx, NoParams())
+    events = await h.list_inbound_events(ctx, NoParams())
+
+    body: list[ui.UINode] = [ui.Text("Webhook status", variant="subtitle")]
+    if outgoing.status == "success" and outgoing.data:
+        body.append(ui.Stack(direction="h", gap=2, align="center", children=[
+            ui.Badge(label="OUTGOING", color="green" if outgoing.data.configured else "gray"),
+            ui.Text(outgoing.data.detail, variant="body"),
+        ]))
+    if inbound.status == "success" and inbound.data:
+        body.append(ui.Stack(direction="h", gap=2, align="center", children=[
+            ui.Badge(label="INBOUND", color="green" if inbound.data.configured else "gray"),
+            ui.Text(inbound.data.detail, variant="body"),
+        ]))
+
+    body.append(ui.Divider())
+    body.append(ui.Text("Recent inbound events", variant="subtitle"))
+    if events.status == "success" and events.data and events.data.events:
+        for e in events.data.events[:15]:
+            body.append(ui.Stack(direction="h", gap=2, align="center", children=[
+                ui.Text(e.received_at, variant="caption"),
+                ui.Text(e.payload_preview, variant="body"),
+            ]))
+    else:
+        body.append(ui.Text("No inbound events received yet.", variant="caption"))
+
+    return ui.Stack(direction="v", gap=3, align="stretch", children=body)
