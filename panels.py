@@ -24,8 +24,7 @@ import handlers as h
 
 def _settings_button() -> ui.UINode:
     return ui.Button(
-        "App settings", variant="secondary", size="sm", full_width=True,
-        icon="settings", on_click=ui.Call("__panel__zapier_settings"),
+        "App settings", variant="secondary", size="sm", icon="settings", on_click=ui.Call("__panel__zapier_settings"),
     )
 
 
@@ -71,12 +70,10 @@ async def zapier_connect_panel(ctx, **kwargs) -> object:
         _inbound_section(in_status.configured, in_status.webhook_url),
         ui.Divider(),
         ui.Button(
-            "How this works", variant="ghost", size="sm", full_width=True,
-            icon="help-circle", on_click=ui.Call("__panel__zapier_connect_help"),
+            "How this works", variant="ghost", size="sm", icon="help-circle", on_click=ui.Call("__panel__zapier_connect_help"),
         ),
         ui.Button(
-            "View webhook activity", variant="primary", size="sm", full_width=True,
-            icon="Activity", on_click=ui.Call("__panel__zapier_center"),
+            "View webhook activity", variant="primary", size="sm", icon="Activity", on_click=ui.Call("__panel__zapier_center"),
         ),
         _settings_button(),
     ]
